@@ -3,6 +3,7 @@ Read interfaces from hardware
 Save interfaces to interfaces.csv
 Save interfaces to interfaces.xlsx
 """
+from threading import Thread
 from config import StarOS
 import paramiko
 import pyexcel
@@ -194,6 +195,13 @@ def create_xlsx_copy(output_file_name, delimiter=","):
     return sheet.save_as(f"files/{output_file_name}.xlsx")
 
 
+def procedure(host, user, secret, output_file_name, fieldnames):
+    interfaces = get_intefaces(host.get('host'), user, secret)
+    for interface in interfaces:
+        write_interface_file(interface, host, output_file_name, fieldnames)
+    print(f"\tInterfaces getting from {host.get('hostname')} is end")
+
+
 def main():
     """
     Main logic
@@ -211,13 +219,17 @@ def main():
     create_csv_file(output_file_name, fieldnames)
 
     # read from hosts interfaces
-
+    threads = []
     for host in hosts:
         print(f"\tInterfaces getting from {host.get('hostname')} is start")
-        interfaces = get_intefaces(host.get('host'), user, secret)
-        for interface in interfaces:
-            write_interface_file(interface, host, output_file_name, fieldnames)
-        print(f"\tInterfaces getting from {host.get('hostname')} is end")
+        thread = Thread(target=procedure, args=(host, user, secret, output_file_name, fieldnames))
+        thread.setDaemon(True)
+        thread.start()
+        threads.append(thread)
+
+    for thread in threads:
+        thread.join()
+
     print("File successfully create")
     create_xlsx_copy(output_file_name)
 
