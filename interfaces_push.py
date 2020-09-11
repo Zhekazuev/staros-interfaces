@@ -83,7 +83,7 @@ def create_ipv4(row, vrf_id, role, interface_id, interface_name):
         "custom_fields": {}
     }
     new_interface = requests.post(interface_url, headers=headers, json=push_interface)
-    print(new_interface.text)
+    return new_interface.text
 
 
 def create_ipv6(row, vrf_id, interface_id, interface_name):
@@ -107,7 +107,7 @@ def create_ipv6(row, vrf_id, interface_id, interface_name):
         "custom_fields": {}
     }
     new_interface = requests.post(interface_url, headers=headers, json=push_interfacev6)
-    print(new_interface.text)
+    return new_interface.text
 
 
 def read_file(file_name, delimiter=","):
@@ -182,11 +182,11 @@ def create_interfaces(device, file_name):
 
                     if not check_ip(ipv4, vrf_id, interface_id):
                         # creating IPv4 interface in current Context
-                        create_ipv4(row, vrf_id, role, interface_id, interface_name)
+                        print(create_ipv4(row, vrf_id, role, interface_id, interface_name))
 
                     # if secondary IPv6 address is in file, creating him
                     if ipv6 and (not check_ip(ipv6, vrf_id, interface_id)):
-                        create_ipv6(row, vrf_id, interface_id, interface_name)
+                        print(create_ipv6(row, vrf_id, interface_id, interface_name))
 
         print("\tInterfaces are created!")
 
@@ -199,7 +199,7 @@ def main():
     interface(StarOS) is address(Netbox) in interface(Netbox)
     """
     file_name = "interfaces"
-    device = "device_name in file"
+    device = "device name in file"
     create_contexts(device, file_name)
     create_interfaces(device, file_name)
 
